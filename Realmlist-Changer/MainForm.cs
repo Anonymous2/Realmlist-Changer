@@ -458,8 +458,8 @@ namespace Realmlist_Changer
 
             realmlists.Remove(realmlist);
 
-            if (comboBoxItems.SelectedIndex != -1)
-                comboBoxItems.Items.RemoveAt(comboBoxItems.SelectedIndex);
+            if (comboBoxItems.Items.Contains(realmlist))
+                comboBoxItems.Items.Remove(realmlist);
 
             if (comboBoxItems.Items.Count == 0)
             {
