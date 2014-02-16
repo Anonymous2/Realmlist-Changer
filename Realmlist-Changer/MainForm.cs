@@ -330,6 +330,9 @@ namespace Realmlist_Changer
 
         private void comboBoxItems_SelectedIndexChanged(object sender, EventArgs e)
         {
+            textBoxAccountName.Text = String.Empty;
+            textBoxAccountPassword.Text = String.Empty;
+
             if (comboBoxItems.SelectedIndex == -1)
                 return;
 
