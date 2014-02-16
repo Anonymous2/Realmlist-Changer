@@ -162,9 +162,7 @@ namespace Realmlist_Changer
 
             try
             {
-                Process process = Process.Start(textBoxWowFile.Text);
-
-                //! If no exception occurred, delete the cache folder.
+                //! Delete the cache folder.
                 //! The reason this has its own try-catch block is because the logging in should not
                 //! be stopped if the directory removing threw an exception.
                 try
@@ -176,6 +174,8 @@ namespace Realmlist_Changer
                 {
 
                 }
+
+                Process process = Process.Start(textBoxWowFile.Text);
 
                 //! Only attempt to login to the account page (and possibly character if checkbox is checked) if te
                 //! acc info is actually given.
