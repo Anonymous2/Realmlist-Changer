@@ -76,7 +76,6 @@ namespace Realmlist_Changer
             SendMessage(textBoxAccountPassword.Handle, EM_SETCUEBANNER, 0, "Account password");
             textBoxRealmlistFile.Text = Settings.Default.RealmlistDir;
             textBoxWowFile.Text = Settings.Default.WorldOfWarcraftDir;
-            checkBoxLoginToChar.Checked = Settings.Default.LoginToChar;
 
             if (File.Exists(xmlDirFile))
             {
@@ -162,22 +161,25 @@ namespace Realmlist_Changer
 
             try
             {
-                //! Delete the cache folder.
+                //! Delete the cache folder if the settings tell us to.
                 //! The reason this has its own try-catch block is because the logging in should not
                 //! be stopped if the directory removing threw an exception.
-                try
+                if (Settings.Default.DeleteCache)
                 {
-                    DirectoryInfo dirInfo = new DirectoryInfo(Path.GetDirectoryName(textBoxWowFile.Text) + @"\Cache");
-                    dirInfo.Delete(true);
-                }
-                catch
-                {
+                    try
+                    {
+                        DirectoryInfo dirInfo = new DirectoryInfo(Path.GetDirectoryName(textBoxWowFile.Text) + @"\Cache");
+                        dirInfo.Delete(true);
+                    }
+                    catch
+                    {
 
+                    }
                 }
 
                 Process process = Process.Start(textBoxWowFile.Text);
 
-                //! Only attempt to login to the account page (and possibly character if checkbox is checked) if te
+                //! Only attempt to login to the account page (and possibly character if set to do so in settings) if te
                 //! acc info is actually given.
                 if (String.IsNullOrWhiteSpace(textBoxAccountName.Text) && String.IsNullOrWhiteSpace(textBoxAccountPassword.Text))
                     return;
@@ -218,7 +220,7 @@ namespace Realmlist_Changer
                             SendMessage(process.MainWindowHandle, WM_KEYDOWN, new IntPtr(VK_RETURN), IntPtr.Zero);
 
                             //! Login to char
-                            if (checkBoxLoginToChar.Checked)
+                            if (Settings.Default.LoginToChar)
                             {
                                 Thread.Sleep(1500);
                                 SendMessage(process.MainWindowHandle, WM_KEYUP, new IntPtr(VK_RETURN), IntPtr.Zero);
@@ -245,7 +247,6 @@ namespace Realmlist_Changer
             Settings.Default.RealmlistDir = textBoxRealmlistFile.Text;
             Settings.Default.WorldOfWarcraftDir = textBoxWowFile.Text;
             Settings.Default.LastSelectedIndex = comboBoxItems.SelectedIndex;
-            Settings.Default.LoginToChar = checkBoxLoginToChar.Checked;
 
             if (!Directory.Exists(xmlDir))
                 Directory.CreateDirectory(xmlDir);
@@ -478,6 +479,12 @@ namespace Realmlist_Changer
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Realmlist-Changer @ 2014 Discover-", "About Realmlist-Changer", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void menuItemSettings_Click(object sender, EventArgs e)
+        {
+            using (SettingsForm settingsForm = new SettingsForm())
+                settingsForm.ShowDialog(this);
         }
     }
 }
