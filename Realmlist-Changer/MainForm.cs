@@ -194,9 +194,9 @@ namespace Realmlist_Changer
                         while (!process.WaitForInputIdle()) ;
                         Thread.Sleep(500);
 
-                        for (int i = 0; i < textBoxAccountName.Text.Length; i++)
+                        foreach (char accNameLetter in textBoxAccountName.Text)
                         {
-                            SendMessage(process.MainWindowHandle, WM_CHAR, new IntPtr(textBoxAccountName.Text[i]), IntPtr.Zero);
+                            SendMessage(process.MainWindowHandle, WM_CHAR, new IntPtr(accNameLetter), IntPtr.Zero);
                             Thread.Sleep(30);
                         }
 
@@ -205,9 +205,9 @@ namespace Realmlist_Changer
                         {
                             SendMessage(process.MainWindowHandle, WM_KEYDOWN, new IntPtr(VK_TAB), IntPtr.Zero);
 
-                            for (int i = 0; i < textBoxAccountPassword.Text.Length; i++)
+                            foreach (char accPassLetter in textBoxAccountPassword.Text)
                             {
-                                SendMessage(process.MainWindowHandle, WM_CHAR, new IntPtr(textBoxAccountPassword.Text[i]), IntPtr.Zero);
+                                SendMessage(process.MainWindowHandle, WM_CHAR, new IntPtr(accPassLetter), IntPtr.Zero);
                                 Thread.Sleep(30);
                             }
 
@@ -348,12 +348,17 @@ namespace Realmlist_Changer
                 {
                     IPAddress hostAddress = Dns.GetHostEntry(selectedItem).AddressList[0];
 
-                    if (hostAddress.AddressFamily == AddressFamily.InterNetwork)
-                        clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    else if (hostAddress.AddressFamily == AddressFamily.InterNetworkV6)
-                        clientSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-                    else
-                        return;
+                    switch (hostAddress.AddressFamily)
+                    {
+                        case AddressFamily.InterNetwork:
+                             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                             break;
+                         case AddressFamily.InterNetworkV6:
+                             clientSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+                             break;
+                         default:
+                             return;
+                    }
 
                     SocketAsyncEventArgs telnetSocketAsyncEventArgs = new SocketAsyncEventArgs();
                     telnetSocketAsyncEventArgs.RemoteEndPoint = new IPEndPoint(hostAddress, 3724); //! Client port is always 3724 so this is safe
