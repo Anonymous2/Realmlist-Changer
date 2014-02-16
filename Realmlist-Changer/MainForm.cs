@@ -192,7 +192,8 @@ namespace Realmlist_Changer
                         Thread.CurrentThread.IsBackground = true;
 
                         while (!process.WaitForInputIdle()) ;
-                        Thread.Sleep(500);
+
+                        Thread.Sleep(1500);
 
                         foreach (char accNameLetter in textBoxAccountName.Text)
                         {
