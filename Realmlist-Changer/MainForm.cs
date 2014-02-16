@@ -191,14 +191,8 @@ namespace Realmlist_Changer
                     {
                         Thread.CurrentThread.IsBackground = true;
 
-                        do
-                        {
-                            process.WaitForInputIdle();
-                            process.Refresh();
-                        }
-                        while (process.MainWindowHandle.ToInt32() == 0);
-
-                        Thread.Sleep(800);
+                        while (!process.WaitForInputIdle()) ;
+                        Thread.Sleep(500);
 
                         for (int i = 0; i < textBoxAccountName.Text.Length; i++)
                         {
