@@ -203,6 +203,7 @@ namespace Realmlist_Changer
                         //! Switch to password field
                         if (!String.IsNullOrWhiteSpace(textBoxAccountPassword.Text))
                         {
+                            SendMessage(process.MainWindowHandle, WM_KEYUP, new IntPtr(VK_TAB), IntPtr.Zero);
                             SendMessage(process.MainWindowHandle, WM_KEYDOWN, new IntPtr(VK_TAB), IntPtr.Zero);
 
                             foreach (char accPassLetter in textBoxAccountPassword.Text)
