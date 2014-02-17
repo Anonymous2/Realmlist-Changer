@@ -45,5 +45,18 @@ namespace Realmlist_Changer
         {
             Close();
         }
+
+        private void SettingsForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    buttonContinue.PerformClick();
+                    break;
+                case Keys.Escape:
+                    Close();
+                    break;
+            }
+        }
     }
 }
