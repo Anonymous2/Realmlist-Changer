@@ -18,6 +18,7 @@ using System.Threading;
 using System.Security.Cryptography;
 using System.Xml;
 using System.Xml.Linq;
+using System.Reflection;
 
 namespace Realmlist_Changer
 {
@@ -54,6 +55,7 @@ namespace Realmlist_Changer
         private Dictionary<string /* realmlist */, Account /* account */> realmlists = new Dictionary<string, Account>();
         private string xmlDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Realmlist-Changer\";
         private string xmlDirFile = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Realmlist-Changer\realmlist-changer.xml";
+        private string applicationVersion = String.Empty;
         private Socket clientSocket = null;
 
         public Dictionary<string, Account> Realmlists
@@ -65,6 +67,10 @@ namespace Realmlist_Changer
         public MainForm()
         {
             InitializeComponent();
+
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            applicationVersion = "v" + version.Major + "." + version.Minor + "." + version.Build;
+            Text = "Realmlist Changer " + applicationVersion + "";
         }
 
         private void MainForm_Load(object sender, EventArgs e)
