@@ -114,7 +114,9 @@ namespace Realmlist_Changer
             }
 
             //! Has to be called after xml loading
-            if (comboBoxItems.Items.Count > Settings.Default.LastSelectedIndex)
+            if (comboBoxItems.Items.Count > 0 && Settings.Default.LastSelectedIndex == -2)
+                comboBoxItems.SelectedIndex = 0;
+            else if (comboBoxItems.Items.Count > Settings.Default.LastSelectedIndex)
                 comboBoxItems.SelectedIndex = Settings.Default.LastSelectedIndex;
 
             if (comboBoxItems.SelectedIndex != -1 && realmlists.ContainsKey(comboBoxItems.Text))
@@ -125,7 +127,7 @@ namespace Realmlist_Changer
             else
             {
                 textBoxAccountName.Text = String.Empty;
-                textBoxAccountPassword.Text = String.Empty; //! Already decrypted
+                textBoxAccountPassword.Text = String.Empty;
             }
         }
 
