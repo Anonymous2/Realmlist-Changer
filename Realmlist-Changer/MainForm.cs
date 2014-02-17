@@ -348,6 +348,9 @@ namespace Realmlist_Changer
             labelOnOrOff.ForeColor = Color.Black;
             labelOnOrOff.Update();
 
+            textBoxAccountName.Text = realmlists[selectedItem].accountName;
+            textBoxAccountPassword.Text = realmlists[selectedItem].accountPassword;
+
             try
             {
                 if (selectedItem != "127.0.0.1" && selectedItem != "localhost")
@@ -374,15 +377,10 @@ namespace Realmlist_Changer
                 else
                     //! If server is localhost, check if worldserver is running
                     SetSelectedServerState(Process.GetProcessesByName("worldserver").Length > 0 && Process.GetProcessesByName("authserver").Length > 0);
-
-                textBoxAccountName.Text = realmlists[selectedItem].accountName;
-                textBoxAccountPassword.Text = realmlists[selectedItem].accountPassword;
             }
             catch (Exception)
             {
                 SetSelectedServerState(false);
-                textBoxAccountName.Text = String.Empty;
-                textBoxAccountPassword.Text = String.Empty;
             }
         }
 
