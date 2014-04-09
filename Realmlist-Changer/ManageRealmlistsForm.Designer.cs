@@ -40,10 +40,10 @@
             // 
             // textBoxAccountPassword
             // 
-            this.textBoxAccountPassword.Location = new System.Drawing.Point(181, 38);
+            this.textBoxAccountPassword.Location = new System.Drawing.Point(182, 38);
             this.textBoxAccountPassword.Name = "textBoxAccountPassword";
             this.textBoxAccountPassword.PasswordChar = '*';
-            this.textBoxAccountPassword.Size = new System.Drawing.Size(169, 20);
+            this.textBoxAccountPassword.Size = new System.Drawing.Size(168, 20);
             this.textBoxAccountPassword.TabIndex = 2;
             // 
             // textBoxAccountName
