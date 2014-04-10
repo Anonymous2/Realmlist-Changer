@@ -44,11 +44,12 @@
             this.labelOnOrOff = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItemSettings = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuItemSettings = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboBoxAccountName = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -119,7 +120,7 @@
             // 
             // textBoxAccountName
             // 
-            this.textBoxAccountName.Location = new System.Drawing.Point(6, 44);
+            this.textBoxAccountName.Location = new System.Drawing.Point(129, 202);
             this.textBoxAccountName.Name = "textBoxAccountName";
             this.textBoxAccountName.Size = new System.Drawing.Size(181, 20);
             this.textBoxAccountName.TabIndex = 8;
@@ -149,10 +150,10 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.comboBoxAccountName);
             this.groupBox3.Controls.Add(this.button1);
             this.groupBox3.Controls.Add(this.comboBoxItems);
             this.groupBox3.Controls.Add(this.textBoxAccountPassword);
-            this.groupBox3.Controls.Add(this.textBoxAccountName);
             this.groupBox3.Location = new System.Drawing.Point(12, 104);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(376, 71);
@@ -200,10 +201,22 @@
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // menuItemSettings
+            // 
+            this.menuItemSettings.Name = "menuItemSettings";
+            this.menuItemSettings.Size = new System.Drawing.Size(116, 22);
+            this.menuItemSettings.Text = "Settings";
+            this.menuItemSettings.Click += new System.EventHandler(this.menuItemSettings_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(113, 6);
+            // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -222,17 +235,13 @@
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 
-            // toolStripSeparator1
+            // comboBoxAccountName
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
-            // 
-            // menuItemSettings
-            // 
-            this.menuItemSettings.Name = "menuItemSettings";
-            this.menuItemSettings.Size = new System.Drawing.Size(152, 22);
-            this.menuItemSettings.Text = "Settings";
-            this.menuItemSettings.Click += new System.EventHandler(this.menuItemSettings_Click);
+            this.comboBoxAccountName.FormattingEnabled = true;
+            this.comboBoxAccountName.Location = new System.Drawing.Point(6, 43);
+            this.comboBoxAccountName.Name = "comboBoxAccountName";
+            this.comboBoxAccountName.Size = new System.Drawing.Size(181, 21);
+            this.comboBoxAccountName.TabIndex = 16;
             // 
             // MainForm
             // 
@@ -241,6 +250,7 @@
             this.ClientSize = new System.Drawing.Size(402, 211);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.textBoxAccountName);
             this.Controls.Add(this.labelOnOrOff);
             this.Controls.Add(this.buttonLaunchWow);
             this.Controls.Add(this.label1);
@@ -287,6 +297,7 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem menuItemSettings;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ComboBox comboBoxAccountName;
     }
 }
 

@@ -52,13 +52,13 @@ namespace Realmlist_Changer
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
-        private Dictionary<string /* realmlist */, Account /* account */> realmlists = new Dictionary<string, Account>();
+        private Dictionary<string /* realmlist */, List<Account> /* account */> realmlists = new Dictionary<string, List<Account>>();
         private string xmlDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Realmlist-Changer\";
         private string xmlDirFile = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Realmlist-Changer\realmlist-changer.xml";
         private string applicationVersion = String.Empty;
         private Socket clientSocket = null;
 
-        public Dictionary<string, Account> Realmlists
+        public Dictionary<string, List<Account>> Realmlists
         {
             get { return realmlists; }
             set { realmlists = value; }
@@ -78,10 +78,10 @@ namespace Realmlist_Changer
             //! Set the placeholder text
             SendMessage(textBoxRealmlistFile.Handle, EM_SETCUEBANNER, 0, "Realmlist.wtf directory");
             SendMessage(textBoxWowFile.Handle, EM_SETCUEBANNER, 0, "Wow.exe directory");
-            SendMessage(textBoxAccountName.Handle, EM_SETCUEBANNER, 0, "Account name");
             SendMessage(textBoxAccountPassword.Handle, EM_SETCUEBANNER, 0, "Account password");
             textBoxRealmlistFile.Text = Settings.Default.RealmlistDir;
             textBoxWowFile.Text = Settings.Default.WorldOfWarcraftDir;
+            List<Account> accounts = new List<Account>();
 
             if (File.Exists(xmlDirFile))
             {
@@ -110,7 +110,12 @@ namespace Realmlist_Changer
                                         string accountPassword = GetDecryptedPassword(encryptedPassword, reader.ReadString());
 
                                         comboBoxItems.Items.Add(realmlist);
-                                        realmlists.Add(realmlist, new Account(accountName, accountPassword));
+
+                                        if (!realmlists.ContainsKey(realmlist))
+                                            realmlists.Add(realmlist, null);
+                                        else
+                                            realmlists[realmlist].Add(new Account(accountName, accountPassword));
+
                                         break;
                                 }
                             }
