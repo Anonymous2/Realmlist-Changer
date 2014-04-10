@@ -13,11 +13,7 @@ namespace Realmlist_Changer
 {
     public partial class ManageRealmlistsForm : Form
     {
-        private const int EM_SETCUEBANNER = 0x1501;
-        private Dictionary<string /* realmlist */, Account /* account */> realmlists = new Dictionary<string, Account>();
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern Int32 SendMessage(IntPtr hWnd, int msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)]string lParam);
+        private Dictionary<string /* realmlist */, Dictionary<string /* accountName */, string /* accountPassword */>> realmlists = new Dictionary<string, Dictionary<string /* accountName */, string /* accountPassword */>>();
 
         public ManageRealmlistsForm()
         {
@@ -29,21 +25,13 @@ namespace Realmlist_Changer
             realmlists = ((MainForm)Owner).Realmlists; //! Has to be called in Load event, otherwise Owner is NULL
 
             foreach (string realmlist in realmlists.Keys)
-                comboBoxItems.Items.Add(realmlist);
+                comboBoxRealmlists.Items.Add(realmlist);
 
-            //! Set the placeholder text - sadly doesn't work for realmlists
-            SendMessage(textBoxAccountName.Handle, EM_SETCUEBANNER, 0, "Account name");
-            SendMessage(textBoxAccountPassword.Handle, EM_SETCUEBANNER, 0, "Account password");
-
-            if (comboBoxItems.Items.Count > 0)
-            {
-                comboBoxItems.SelectedIndex = 0;
-                textBoxAccountName.Text = realmlists[comboBoxItems.Text].accountName;
-                textBoxAccountPassword.Text = realmlists[comboBoxItems.Text].accountPassword;
-            }
+            if (comboBoxRealmlists.Items.Count > 0)
+                comboBoxRealmlists.SelectedIndex = 0;
 
             //! Focus on the realmlis combobox
-            comboBoxItems.Select();
+            comboBoxRealmlists.Select();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
@@ -53,44 +41,33 @@ namespace Realmlist_Changer
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            if (comboBoxItems.SelectedIndex == -1)
+            if (comboBoxRealmlists.SelectedIndex == -1)
             {
                 MessageBox.Show("There is no item selected!", "Nothing selected!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            ((MainForm)Owner).RemoveRealmlist(comboBoxItems.Text);
+            ((MainForm)Owner).RemoveRealmlist(comboBoxRealmlists.Text);
             Close();
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            if (comboBoxItems.SelectedIndex != -1)
-            {
-                MessageBox.Show("This realmlist already exists!", "Realmlist must be unique!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (String.IsNullOrWhiteSpace(comboBoxItems.Text))
+            if (String.IsNullOrWhiteSpace(comboBoxRealmlists.Text) || String.IsNullOrWhiteSpace(comboBoxAccountName.Text) || String.IsNullOrWhiteSpace(textBoxAccountPassword.Text))
             {
                 MessageBox.Show("All fields must be filled!", "Not all fields are filled!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            AddRealmlistErrors error = ((MainForm)Owner).AddRealmlist(comboBoxItems.Text, new Account(textBoxAccountName.Text, textBoxAccountPassword.Text));
-
-            switch (error)
+            if (realmlists.ContainsKey(comboBoxRealmlists.Text) && realmlists[comboBoxRealmlists.Text].ContainsKey(comboBoxAccountName.Text) &&
+                realmlists[comboBoxRealmlists.Text][comboBoxAccountName.Text] == textBoxAccountPassword.Text)
             {
-                case AddRealmlistErrors.AddRealmlistErrorAlreadyAdded:
-                    MessageBox.Show("This realmlist already exists!", "Already exists!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
-                case AddRealmlistErrors.AddRealmlistErrorInvalidRealmlist:
-                    MessageBox.Show("This realmlist is incorrect!", "Incorrect realmlist!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
-                case AddRealmlistErrors.AddRealmlistErrorNone:
-                    Close();
-                    break;
+                MessageBox.Show("This account already exists for this realmlist.", "Already exists!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+
+            ((MainForm)Owner).AddRealmlist(comboBoxRealmlists.Text, comboBoxAccountName.Text, textBoxAccountPassword.Text);
+            Close();
         }
 
         private void ManageRealmlistsForm_KeyDown(object sender, KeyEventArgs e)
@@ -105,13 +82,13 @@ namespace Realmlist_Changer
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if (comboBoxItems.SelectedIndex == -1)
+            if (comboBoxRealmlists.SelectedIndex == -1)
             {
                 MessageBox.Show("There is no item selected!", "Nothing selected!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            ChangeRealmlistErrors error = ((MainForm)Owner).ChangeRealmlist(comboBoxItems.Text, new Account(textBoxAccountName.Text, textBoxAccountPassword.Text));
+            ChangeRealmlistErrors error = ((MainForm)Owner).ChangeRealmlist(comboBoxRealmlists.Text, comboBoxAccountName.Text, textBoxAccountPassword.Text);
 
             switch (error)
             {
@@ -130,18 +107,29 @@ namespace Realmlist_Changer
             }
         }
 
-        private void comboBoxItems_SelectedIndexChanged(object sender, EventArgs e)
+        private void comboBoxRealmlists_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBoxItems.SelectedIndex == -1)
+            if (comboBoxRealmlists.SelectedIndex == -1 || !realmlists.ContainsKey(comboBoxRealmlists.Text))
                 return;
 
-            string selectedItem = comboBoxItems.SelectedItem.ToString();
+            comboBoxAccountName.Items.Clear();
 
-            if (!realmlists.ContainsKey(selectedItem))
+            foreach (string accountName in realmlists[comboBoxRealmlists.Text].Keys)
+                comboBoxAccountName.Items.Add(accountName);
+
+            if (comboBoxAccountName.Items.Count > 0)
+                comboBoxAccountName.SelectedIndex = 0;
+        }
+
+        private void comboBoxAccountName_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!realmlists.ContainsKey(comboBoxRealmlists.Text) || !realmlists[comboBoxRealmlists.Text].ContainsKey(comboBoxAccountName.Text))
+            {
+                MessageBox.Show("Something went wrong...", "Woops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
+            }
 
-            textBoxAccountName.Text = realmlists[selectedItem].accountName;
-            textBoxAccountPassword.Text = realmlists[selectedItem].accountPassword;
+            textBoxAccountPassword.Text = realmlists[comboBoxRealmlists.Text][comboBoxAccountName.Text];
         }
     }
 }

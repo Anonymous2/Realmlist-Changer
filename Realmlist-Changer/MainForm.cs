@@ -22,13 +22,6 @@ using System.Reflection;
 
 namespace Realmlist_Changer
 {
-    public enum AddRealmlistErrors
-    {
-        AddRealmlistErrorNone = 0,
-        AddRealmlistErrorAlreadyAdded = 1,
-        AddRealmlistErrorInvalidRealmlist = 2,
-    }
-
     public enum ChangeRealmlistErrors
     {
         ChangeRealmlistErrorNone = 0,
@@ -52,13 +45,13 @@ namespace Realmlist_Changer
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
-        private Dictionary<string /* realmlist */, List<Account> /* account */> realmlists = new Dictionary<string, List<Account>>();
+        private Dictionary<string /* realmlist */, Dictionary<string /* accountName */, string /* accountPassword */>> realmlists = new Dictionary<string, Dictionary<string /* accountName */, string /* accountPassword */>>();
         private string xmlDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Realmlist-Changer\";
         private string xmlDirFile = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Realmlist-Changer\realmlist-changer.xml";
         private string applicationVersion = String.Empty;
         private Socket clientSocket = null;
 
-        public Dictionary<string, List<Account>> Realmlists
+        public Dictionary<string, Dictionary<string /* accountName */, string /* accountPassword */>> Realmlists
         {
             get { return realmlists; }
             set { realmlists = value; }
@@ -78,10 +71,8 @@ namespace Realmlist_Changer
             //! Set the placeholder text
             SendMessage(textBoxRealmlistFile.Handle, EM_SETCUEBANNER, 0, "Realmlist.wtf directory");
             SendMessage(textBoxWowFile.Handle, EM_SETCUEBANNER, 0, "Wow.exe directory");
-            SendMessage(textBoxAccountPassword.Handle, EM_SETCUEBANNER, 0, "Account password");
             textBoxRealmlistFile.Text = Settings.Default.RealmlistDir;
             textBoxWowFile.Text = Settings.Default.WorldOfWarcraftDir;
-            List<Account> accounts = new List<Account>();
 
             if (File.Exists(xmlDirFile))
             {
@@ -109,13 +100,10 @@ namespace Realmlist_Changer
                                     case "entropy":
                                         string accountPassword = GetDecryptedPassword(encryptedPassword, reader.ReadString());
 
-                                        comboBoxItems.Items.Add(realmlist);
+                                        if (!comboBoxRealmlists.Items.Contains(realmlist))
+                                            comboBoxRealmlists.Items.Add(realmlist);
 
-                                        if (!realmlists.ContainsKey(realmlist))
-                                            realmlists.Add(realmlist, null);
-                                        else
-                                            realmlists[realmlist].Add(new Account(accountName, accountPassword));
-
+                                        AddAccountToRealmlist(realmlist, accountName, accountPassword);
                                         break;
                                 }
                             }
@@ -125,21 +113,19 @@ namespace Realmlist_Changer
             }
 
             //! Has to be called after xml loading
-            if (comboBoxItems.Items.Count > 0 && Settings.Default.LastSelectedIndex == -2)
-                comboBoxItems.SelectedIndex = 0;
-            else if (comboBoxItems.Items.Count > Settings.Default.LastSelectedIndex)
-                comboBoxItems.SelectedIndex = Settings.Default.LastSelectedIndex;
+            if (comboBoxRealmlists.Items.Count > 0 && Settings.Default.LastSelectedIndex == -2)
+                comboBoxRealmlists.SelectedIndex = 0;
+            else if (comboBoxRealmlists.Items.Count > Settings.Default.LastSelectedIndex)
+                comboBoxRealmlists.SelectedIndex = Settings.Default.LastSelectedIndex;
 
-            if (comboBoxItems.SelectedIndex != -1 && realmlists.ContainsKey(comboBoxItems.Text))
-            {
-                textBoxAccountName.Text = realmlists[comboBoxItems.Text].accountName;
-                textBoxAccountPassword.Text = realmlists[comboBoxItems.Text].accountPassword; //! Already decrypted
-            }
-            else
-            {
-                textBoxAccountName.Text = String.Empty;
+            //! HAS to be called after setting comboBoxRealmlists's selected index
+            if (comboBoxAccountName.Items.Count > 0)
+                comboBoxAccountName.SelectedIndex = 0;
+
+            if (comboBoxRealmlists.SelectedIndex == -1 || !realmlists.ContainsKey(comboBoxRealmlists.Text))
                 textBoxAccountPassword.Text = String.Empty;
-            }
+            else
+                textBoxAccountPassword.Text = realmlists[comboBoxRealmlists.Text][comboBoxAccountName.Text];
         }
 
         private void buttonSearchDirectory_Click(object sender, EventArgs e)
@@ -170,7 +156,7 @@ namespace Realmlist_Changer
             }
 
             using (var outputFile = new StreamWriter(textBoxRealmlistFile.Text, false))
-                outputFile.WriteLine("set realmlist " + comboBoxItems.SelectedItem);
+                outputFile.WriteLine("set realmlist " + comboBoxRealmlists.SelectedItem);
 
             try
             {
@@ -194,9 +180,10 @@ namespace Realmlist_Changer
 
                 //! Only attempt to login to the account page (and possibly character if set to do so in settings) if te
                 //! acc info is actually given.
-                if (String.IsNullOrWhiteSpace(textBoxAccountName.Text) && String.IsNullOrWhiteSpace(textBoxAccountPassword.Text))
+                if (comboBoxAccountName.SelectedIndex == -1)
                     return;
 
+                string accountName = comboBoxAccountName.Text;
                 Thread.Sleep(600);
 
                 //! Run this code in a new thread so the main form does not freeze up.
@@ -210,7 +197,7 @@ namespace Realmlist_Changer
 
                         Thread.Sleep(1500);
 
-                        foreach (char accNameLetter in textBoxAccountName.Text)
+                        foreach (char accNameLetter in accountName)
                         {
                             SendMessage(process.MainWindowHandle, WM_CHAR, new IntPtr(accNameLetter), IntPtr.Zero);
                             Thread.Sleep(30);
@@ -259,7 +246,7 @@ namespace Realmlist_Changer
         {
             Settings.Default.RealmlistDir = textBoxRealmlistFile.Text;
             Settings.Default.WorldOfWarcraftDir = textBoxWowFile.Text;
-            Settings.Default.LastSelectedIndex = comboBoxItems.SelectedIndex;
+            Settings.Default.LastSelectedIndex = comboBoxRealmlists.SelectedIndex;
 
             if (!Directory.Exists(xmlDir))
                 Directory.CreateDirectory(xmlDir);
@@ -273,19 +260,26 @@ namespace Realmlist_Changer
 
                 foreach (string realmlist in realmlists.Keys)
                 {
-                    Account acc = realmlists[realmlist];
                     writer.WriteStartElement("realm");
                     writer.WriteAttributeString("realmlist", realmlist);
-                    writer.WriteElementString("accountname", acc.accountName);
 
-                    //! Encrypt the password
-                    RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-                    byte[] buffer = new byte[1024];
-                    rng.GetBytes(buffer);
-                    string salt = BitConverter.ToString(buffer);
-                    rng.Dispose();
-                    writer.WriteElementString("accountpassword", acc.accountPassword.Length == 0 ? String.Empty : acc.accountPassword.ToSecureString().EncryptString(Encoding.Unicode.GetBytes(salt)));
-                    writer.WriteElementString("entropy", salt);
+                    foreach (KeyValuePair<string, string> accountInfo in realmlists[realmlist])
+                    {
+                        writer.WriteStartElement("account");
+                        writer.WriteElementString("accountname", accountInfo.Key);
+
+                        //! Encrypt the password
+                        RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+                        byte[] buffer = new byte[1024];
+                        rng.GetBytes(buffer);
+                        string salt = BitConverter.ToString(buffer);
+                        rng.Dispose();
+                        writer.WriteElementString("accountpassword", accountInfo.Value.Length == 0 ? String.Empty : accountInfo.Value.ToSecureString().EncryptString(Encoding.Unicode.GetBytes(salt)));
+                        writer.WriteElementString("entropy", salt);
+
+                        writer.WriteEndElement();
+                    }
+
                     writer.WriteEndElement();
                 }
 
@@ -308,18 +302,18 @@ namespace Realmlist_Changer
 
         private void buttonRemove_Click(object sender, EventArgs e)
         {
-            if (comboBoxItems.SelectedIndex == -1)
+            if (comboBoxRealmlists.SelectedIndex == -1)
             {
                 MessageBox.Show("You have no item selected to remove!", "Something went wrong!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            realmlists.Remove(comboBoxItems.SelectedItem.ToString());
-            comboBoxItems.Items.Remove(comboBoxItems.SelectedItem);
-            comboBoxItems.SelectedIndex = comboBoxItems.Items.Count > 0 ? 0 : -1;
+            realmlists.Remove(comboBoxRealmlists.Text);
+            comboBoxRealmlists.Items.Remove(comboBoxRealmlists.SelectedItem);
+            comboBoxRealmlists.SelectedIndex = comboBoxRealmlists.Items.Count > 0 ? 0 : -1;
 
-            if (comboBoxItems.Items.Count == 0)
-                comboBoxItems.Text = String.Empty;
+            if (comboBoxRealmlists.Items.Count == 0)
+                comboBoxRealmlists.Text = String.Empty;
         }
 
         private void buttonAddOrRemove_Click(object sender, EventArgs e)
@@ -341,15 +335,14 @@ namespace Realmlist_Changer
                 textBoxWowFile.Text = openFileDialog.FileName;
         }
 
-        private void comboBoxItems_SelectedIndexChanged(object sender, EventArgs e)
+        private void comboBoxRealmlists_SelectedIndexChanged(object sender, EventArgs e)
         {
-            textBoxAccountName.Text = String.Empty;
             textBoxAccountPassword.Text = String.Empty;
 
-            if (comboBoxItems.SelectedIndex == -1)
+            if (comboBoxRealmlists.SelectedIndex == -1)
                 return;
 
-            string selectedItem = comboBoxItems.SelectedItem.ToString();
+            string selectedItem = comboBoxRealmlists.Text;
 
             if (!realmlists.ContainsKey(selectedItem))
                 return;
@@ -361,8 +354,13 @@ namespace Realmlist_Changer
             labelOnOrOff.ForeColor = Color.Black;
             labelOnOrOff.Update();
 
-            textBoxAccountName.Text = realmlists[selectedItem].accountName;
-            textBoxAccountPassword.Text = realmlists[selectedItem].accountPassword;
+            comboBoxAccountName.Items.Clear();
+
+            foreach (string accountName in realmlists[comboBoxRealmlists.Text].Keys)
+                comboBoxAccountName.Items.Add(accountName);
+
+            if (comboBoxAccountName.Items.Count > 0)
+                comboBoxAccountName.SelectedIndex = 0;
 
             try
             {
@@ -433,35 +431,32 @@ namespace Realmlist_Changer
             e.Handled = true;
         }
 
-        public AddRealmlistErrors AddRealmlist(string realmlist, Account account)
+        public void AddRealmlist(string realmlist, string accountName, string accountPassword)
         {
-            if (realmlists.ContainsKey(realmlist))
-                return AddRealmlistErrors.AddRealmlistErrorAlreadyAdded;
+            AddAccountToRealmlist(realmlist, accountName, accountPassword);
 
-            if (String.IsNullOrWhiteSpace(realmlist))
-                return AddRealmlistErrors.AddRealmlistErrorInvalidRealmlist;
-
-            realmlists.Add(realmlist, account);
-            comboBoxItems.Items.Add(realmlist);
-            comboBoxItems.SelectedIndex = comboBoxItems.Items.Count - 1; //! Also sets account info in event
-            return AddRealmlistErrors.AddRealmlistErrorNone;
+            if (!comboBoxRealmlists.Items.Contains(realmlist))
+            {
+                comboBoxRealmlists.Items.Add(realmlist);
+                comboBoxRealmlists.SelectedIndex = comboBoxRealmlists.Items.Count - 1; //! Also sets account info in event
+            }
         }
 
-        public ChangeRealmlistErrors ChangeRealmlist(string realmlist, Account account)
+        public ChangeRealmlistErrors ChangeRealmlist(string realmlist, string accountName, string accountPassword)
         {
             if (!realmlists.ContainsKey(realmlist))
                 return ChangeRealmlistErrors.ChangeRealmlistErrorRealmlistNotFound;
 
-            if (realmlists[realmlist].accountName == account.accountName && realmlists[realmlist].accountPassword == account.accountPassword)
+            if (realmlists[realmlist].ContainsKey(accountName) && realmlists[realmlist][accountName] == accountPassword)
                 return ChangeRealmlistErrors.ChangeRealmlistErrorNothingChanged;
 
             if (String.IsNullOrWhiteSpace(realmlist))
                 return ChangeRealmlistErrors.ChangeRealmlistErrorInvalidRealmlist;
 
             realmlists.Remove(realmlist);
-            realmlists.Add(realmlist, account);
-            comboBoxItems.SelectedIndex = -1;
-            comboBoxItems.SelectedIndex = comboBoxItems.Items.IndexOf(realmlist);
+            AddAccountToRealmlist(realmlist, accountName, accountPassword);
+            comboBoxRealmlists.SelectedIndex = -1;
+            comboBoxRealmlists.SelectedIndex = comboBoxRealmlists.Items.IndexOf(realmlist);
             return ChangeRealmlistErrors.ChangeRealmlistErrorNone;
         }
 
@@ -472,17 +467,16 @@ namespace Realmlist_Changer
 
             realmlists.Remove(realmlist);
 
-            if (comboBoxItems.Items.Contains(realmlist))
-                comboBoxItems.Items.Remove(realmlist);
+            if (comboBoxRealmlists.Items.Contains(realmlist))
+                comboBoxRealmlists.Items.Remove(realmlist);
 
-            if (comboBoxItems.Items.Count == 0)
+            if (comboBoxRealmlists.Items.Count == 0)
             {
-                comboBoxItems.Text = String.Empty;
-                textBoxAccountName.Text = String.Empty;
+                comboBoxRealmlists.Text = String.Empty;
                 textBoxAccountPassword.Text = String.Empty;
             }
             else
-                comboBoxItems.SelectedIndex = 0;
+                comboBoxRealmlists.SelectedIndex = 0;
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -499,6 +493,27 @@ namespace Realmlist_Changer
         {
             using (SettingsForm settingsForm = new SettingsForm())
                 settingsForm.ShowDialog(this);
+        }
+
+        private void comboBoxAccountName_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!realmlists.ContainsKey(comboBoxRealmlists.Text) || !realmlists[comboBoxRealmlists.Text].ContainsKey(comboBoxAccountName.Text))
+            {
+                MessageBox.Show("Something went wrong...", "Woops!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            textBoxAccountPassword.Text = realmlists[comboBoxRealmlists.Text][comboBoxAccountName.Text];
+        }
+
+        private void AddAccountToRealmlist(string realmlist, string accountName, string accountPassword)
+        {
+            if (realmlists.ContainsKey(realmlist))
+                realmlists[realmlist].Add(accountName, accountPassword);
+            else
+                realmlists.Add(realmlist, new Dictionary<string, string>() { { accountName, accountPassword } });
+
+            comboBoxAccountName.Items.Add(accountName);
         }
     }
 }

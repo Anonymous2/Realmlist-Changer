@@ -30,28 +30,22 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageRealmlistsForm));
             this.textBoxAccountPassword = new System.Windows.Forms.TextBox();
-            this.textBoxAccountName = new System.Windows.Forms.TextBox();
             this.buttonCancel = new System.Windows.Forms.Button();
-            this.comboBoxItems = new System.Windows.Forms.ComboBox();
+            this.comboBoxRealmlists = new System.Windows.Forms.ComboBox();
             this.buttonDelete = new System.Windows.Forms.Button();
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
+            this.comboBoxAccountName = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // textBoxAccountPassword
             // 
-            this.textBoxAccountPassword.Location = new System.Drawing.Point(182, 38);
+            this.textBoxAccountPassword.Location = new System.Drawing.Point(182, 37);
+            this.textBoxAccountPassword.Multiline = true;
             this.textBoxAccountPassword.Name = "textBoxAccountPassword";
             this.textBoxAccountPassword.PasswordChar = '*';
-            this.textBoxAccountPassword.Size = new System.Drawing.Size(168, 20);
+            this.textBoxAccountPassword.Size = new System.Drawing.Size(168, 21);
             this.textBoxAccountPassword.TabIndex = 2;
-            // 
-            // textBoxAccountName
-            // 
-            this.textBoxAccountName.Location = new System.Drawing.Point(12, 38);
-            this.textBoxAccountName.Name = "textBoxAccountName";
-            this.textBoxAccountName.Size = new System.Drawing.Size(169, 20);
-            this.textBoxAccountName.TabIndex = 1;
             // 
             // buttonCancel
             // 
@@ -63,14 +57,14 @@
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
-            // comboBoxItems
+            // comboBoxRealmlists
             // 
-            this.comboBoxItems.FormattingEnabled = true;
-            this.comboBoxItems.Location = new System.Drawing.Point(12, 11);
-            this.comboBoxItems.Name = "comboBoxItems";
-            this.comboBoxItems.Size = new System.Drawing.Size(338, 21);
-            this.comboBoxItems.TabIndex = 0;
-            this.comboBoxItems.SelectedIndexChanged += new System.EventHandler(this.comboBoxItems_SelectedIndexChanged);
+            this.comboBoxRealmlists.FormattingEnabled = true;
+            this.comboBoxRealmlists.Location = new System.Drawing.Point(12, 11);
+            this.comboBoxRealmlists.Name = "comboBoxRealmlists";
+            this.comboBoxRealmlists.Size = new System.Drawing.Size(338, 21);
+            this.comboBoxRealmlists.TabIndex = 0;
+            this.comboBoxRealmlists.SelectedIndexChanged += new System.EventHandler(this.comboBoxRealmlists_SelectedIndexChanged);
             // 
             // buttonDelete
             // 
@@ -102,18 +96,27 @@
             this.buttonSave.UseVisualStyleBackColor = true;
             this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
+            // comboBoxAccountName
+            // 
+            this.comboBoxAccountName.FormattingEnabled = true;
+            this.comboBoxAccountName.Location = new System.Drawing.Point(12, 37);
+            this.comboBoxAccountName.Name = "comboBoxAccountName";
+            this.comboBoxAccountName.Size = new System.Drawing.Size(169, 21);
+            this.comboBoxAccountName.TabIndex = 1;
+            this.comboBoxAccountName.SelectedIndexChanged += new System.EventHandler(this.comboBoxAccountName_SelectedIndexChanged);
+            // 
             // ManageRealmlistsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(365, 97);
+            this.Controls.Add(this.comboBoxAccountName);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.buttonAdd);
             this.Controls.Add(this.buttonDelete);
-            this.Controls.Add(this.comboBoxItems);
+            this.Controls.Add(this.comboBoxRealmlists);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.textBoxAccountPassword);
-            this.Controls.Add(this.textBoxAccountName);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
@@ -133,11 +136,11 @@
         #endregion
 
         private System.Windows.Forms.TextBox textBoxAccountPassword;
-        private System.Windows.Forms.TextBox textBoxAccountName;
         private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.ComboBox comboBoxItems;
+        private System.Windows.Forms.ComboBox comboBoxRealmlists;
         private System.Windows.Forms.Button buttonDelete;
         private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.ComboBox comboBoxAccountName;
     }
 }
