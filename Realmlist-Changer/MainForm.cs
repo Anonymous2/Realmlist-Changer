@@ -22,17 +22,11 @@ using System.Reflection;
 
 namespace Realmlist_Changer
 {
-    public enum ChangeRealmlistErrors
-    {
-        ChangeRealmlistErrorNone = 0,
-        ChangeRealmlistErrorNothingChanged = 1,
-        ChangeRealmlistErrorInvalidRealmlist = 2,
-        ChangeRealmlistErrorRealmlistNotFound = 3,
-    }
-
     public partial class MainForm : Form
     {
-        private const int EM_SETCUEBANNER = 0x1501;
+        private const int EM_SETCUEBANNER = 0x1501; //! Used to set placeholder text
+
+        //! Key codes to send to the client
         private const uint WM_KEYDOWN = 0x0100;
         private const uint WM_KEYUP = 0x0101;
         private const uint WM_CHAR = 0x0102;
@@ -98,6 +92,12 @@ namespace Realmlist_Changer
                                         encryptedPassword = reader.ReadString();
                                         break;
                                     case "entropy":
+                                        if (String.IsNullOrWhiteSpace(encryptedPassword))
+                                        {
+                                            MessageBox.Show("Something went wrong while loading an account for realmlist '" + realmlist + "'.", "Something went wrong!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            break;
+                                        }
+
                                         string accountPassword = GetDecryptedPassword(encryptedPassword, reader.ReadString());
 
                                         if (!comboBoxRealmlists.Items.Contains(realmlist))
@@ -440,24 +440,6 @@ namespace Realmlist_Changer
                 comboBoxRealmlists.Items.Add(realmlist);
                 comboBoxRealmlists.SelectedIndex = comboBoxRealmlists.Items.Count - 1; //! Also sets account info in event
             }
-        }
-
-        public ChangeRealmlistErrors ChangeRealmlist(string realmlist, string accountName, string accountPassword)
-        {
-            if (!realmlists.ContainsKey(realmlist))
-                return ChangeRealmlistErrors.ChangeRealmlistErrorRealmlistNotFound;
-
-            if (realmlists[realmlist].ContainsKey(accountName) && realmlists[realmlist][accountName] == accountPassword)
-                return ChangeRealmlistErrors.ChangeRealmlistErrorNothingChanged;
-
-            if (String.IsNullOrWhiteSpace(realmlist))
-                return ChangeRealmlistErrors.ChangeRealmlistErrorInvalidRealmlist;
-
-            realmlists.Remove(realmlist);
-            AddAccountToRealmlist(realmlist, accountName, accountPassword);
-            comboBoxRealmlists.SelectedIndex = -1;
-            comboBoxRealmlists.SelectedIndex = comboBoxRealmlists.Items.IndexOf(realmlist);
-            return ChangeRealmlistErrors.ChangeRealmlistErrorNone;
         }
 
         public void RemoveRealmlist(string realmlist)

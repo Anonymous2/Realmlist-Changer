@@ -80,33 +80,6 @@ namespace Realmlist_Changer
             }
         }
 
-        private void buttonSave_Click(object sender, EventArgs e)
-        {
-            if (comboBoxRealmlists.SelectedIndex == -1)
-            {
-                MessageBox.Show("There is no item selected!", "Nothing selected!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            ChangeRealmlistErrors error = ((MainForm)Owner).ChangeRealmlist(comboBoxRealmlists.Text, comboBoxAccountName.Text, textBoxAccountPassword.Text);
-
-            switch (error)
-            {
-                case ChangeRealmlistErrors.ChangeRealmlistErrorRealmlistNotFound:
-                    MessageBox.Show("This realmlist could not be found!", "Realmlist not found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
-                case ChangeRealmlistErrors.ChangeRealmlistErrorNothingChanged:
-                    MessageBox.Show("This realmlist already had this account information!", "Nothing changed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
-                case ChangeRealmlistErrors.ChangeRealmlistErrorInvalidRealmlist:
-                    MessageBox.Show("This realmlist is incorrect!", "Incorrect realmlist!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
-                case ChangeRealmlistErrors.ChangeRealmlistErrorNone:
-                    Close();
-                    break;
-            }
-        }
-
         private void comboBoxRealmlists_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBoxRealmlists.SelectedIndex == -1 || !realmlists.ContainsKey(comboBoxRealmlists.Text))
