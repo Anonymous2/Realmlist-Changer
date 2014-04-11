@@ -195,7 +195,7 @@ namespace Realmlist_Changer
 
                         while (!process.WaitForInputIdle()) ;
 
-                        Thread.Sleep(1500);
+                        Thread.Sleep(2000);
 
                         foreach (char accNameLetter in accountName)
                         {
