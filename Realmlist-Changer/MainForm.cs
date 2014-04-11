@@ -496,6 +496,7 @@ namespace Realmlist_Changer
                 realmlists.Add(realmlist, new Dictionary<string, string>() { { accountName, accountPassword } });
 
             comboBoxAccountName.Items.Add(accountName);
+            comboBoxAccountName.SelectedIndex = comboBoxAccountName.Items.Count - 1;
         }
     }
 }
